@@ -5,20 +5,22 @@ import ClipLoader from "react-spinners/ClipLoader";
 
 function Unsub() {
   const [isLoading, setIsLoading] = useState(true);
+  const [mes, setMes] = useState("");
   const { id } = useParams();
   useEffect(async () => {
     const payload = { id: id };
     const data = await unsub(payload);
-    setIsLoading(false);
+    if (!data.error) {
+      setMes(data.message);
+      setIsLoading(false);
+    }
   }, []);
   return (
     <div className="flex w-screen h-screen justify-center items-center">
       {isLoading ? (
         <ClipLoader color="#386fa4" />
       ) : (
-        <p className="text-white text-2xl">
-          You have successfully unsubscribed. Hope to see you in future 😔
-        </p>
+        <p className="text-white text-2xl">{mes}</p>
       )}
     </div>
   );
