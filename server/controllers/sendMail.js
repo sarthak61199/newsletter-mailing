@@ -1,6 +1,10 @@
 import handlebars from "handlebars";
-import { transporter } from "../mailConfig.js";
 import { db } from "../db.js";
+import sgMail from "@sendgrid/mail";
+import * as dotenv from "dotenv";
+dotenv.config();
+
+sgMail.setApiKey(process.env.API_KEY);
 
 export const sendMail = async (req, res) => {
   const { emailContent } = req.body;
@@ -10,17 +14,25 @@ export const sendMail = async (req, res) => {
       res.status(500).json({ error: false, message: "Something went wrong" });
       return;
     } else if (results.length !== 0) {
-      results.forEach(async (item) => {
+      results.forEach((item) => {
         const replacements = {
           unsubLink: `http://localhost:5173/unsub/${item.id}`,
         };
         const emailToSend = template(replacements);
-        await transporter.sendMail({
-          from: '"Fred Foo 👻" <foo@example.com>',
+        const msg = {
           to: item.email,
+          from: "donotreplynewsletter57@gmail.com",
           subject: "Newsletter - January, 2023",
           html: emailToSend,
-        });
+        };
+        sgMail
+          .send(msg)
+          .then(() => {
+            console.log("Email sent");
+          })
+          .catch((error) => {
+            console.error(error);
+          });
       });
       res
         .status(200)
